@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 )
+
+const PORT = ":8080"
 
 func home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
@@ -17,7 +20,16 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func snippetView(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Display a specific snippet...")
+	// Extract the value of the id parameter from the query string
+	// convert it to an integer using strconv.Atoi()
+	// if it can't convert to an integer or the value is less then 1 we return a 404
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	fmt.Fprintf(w, "Display a specific snippet with ID %d...", id)
 }
 
 func snippetCreate(w http.ResponseWriter, r *http.Request) {
@@ -25,6 +37,7 @@ func snippetCreate(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Allow", http.MethodPost)
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
+
 	}
 	fmt.Fprint(w, "Create a new snippet...")
 }
